@@ -1,6 +1,10 @@
 ---
 name: searchcans-reader-seo-audit
 description: Extract a URL, PDF, or Office document with SearchCans Reader API and audit web-to-Markdown extractability plus SEO-ready HTML signals such as canonical URL, H1s, meta description, and JSON-LD. Use when diagnosing web-content extraction, preparing RAG inputs, checking dynamic pages, or reviewing a page's basic SEO/GEO implementation with cost-aware Reader settings.
+metadata:
+  author: SearchCans
+  version: 1.0.0
+  tags: [reader-api, web-to-markdown, rag, seo, geo]
 ---
 
 # SearchCans Reader SEO Audit

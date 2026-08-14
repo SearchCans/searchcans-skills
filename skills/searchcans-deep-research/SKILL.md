@@ -1,6 +1,10 @@
 ---
 name: searchcans-deep-research
 description: Conduct bounded, evidence-led, account-aware web research with SearchCans SERP API and Reader API. Use for questions that need current web evidence, such as market, competitor, technology, policy, company, or product research; plan 3–5 research subquestions, search a localized market, read selected pages, reconcile conflicting claims, and deliver a claim-ready brief with traceable URLs.
+metadata:
+  author: SearchCans
+  version: 1.0.0
+  tags: [deep-research, web-research, serp-api, reader-api, ai-agents]
 ---
 
 # SearchCans Deep Research

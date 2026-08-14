@@ -1,6 +1,10 @@
 ---
 name: searchcans-serp-content-gap
 description: Analyze a current, geo-targeted Google or Bing SERP with SearchCans and turn its organic results, People Also Ask questions, related searches, knowledge graph, and news signals into an evidence-backed, account-aware content opportunity brief. Use for SEO/GEO content planning, keyword research, competitor-page analysis, and search-intent analysis.
+metadata:
+  author: SearchCans
+  version: 1.0.0
+  tags: [serp-api, seo, geo, keyword-research, content-strategy]
 ---
 
 # SearchCans SERP Content Gap
