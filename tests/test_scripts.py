@@ -33,7 +33,7 @@ class SearchCansScriptTests(unittest.TestCase):
         self.assertTrue(module.is_success_code(-9999))
 
     def test_extracts_page_signals(self) -> None:
-        module = load_module("page_audit", "skills/searchcans-reader-page-audit/scripts/reader_page_audit.py")
+        module = load_module("seo_audit", "skills/searchcans-reader-seo-audit/scripts/reader_page_audit.py")
         parser = module.PageSignalsParser()
         parser.feed("<link rel='canonical' href='https://example.com/canonical'><meta name='description' content='Summary'><h1> One heading </h1><script type='application/ld+json'>{\"@type\":\"Article\"}</script>")
         parser.close()

@@ -1,9 +1,9 @@
 ---
-name: searchcans-reader-page-audit
-description: Extract a URL, PDF, or Office document with SearchCans Reader API and audit extractability plus SEO-ready HTML signals such as canonical URL, H1s, meta description, and JSON-LD. Use when diagnosing web-content extraction, preparing RAG inputs, checking dynamic pages, or reviewing a page's basic SEO/GEO implementation.
+name: searchcans-reader-seo-audit
+description: Extract a URL, PDF, or Office document with SearchCans Reader API and audit web-to-Markdown extractability plus SEO-ready HTML signals such as canonical URL, H1s, meta description, and JSON-LD. Use when diagnosing web-content extraction, preparing RAG inputs, checking dynamic pages, or reviewing a page's basic SEO/GEO implementation.
 ---
 
-# SearchCans Reader Page Audit
+# SearchCans Reader SEO Audit
 
 Extract a public URL and report what the Reader API returned plus observable page signals. Do not equate a successful extraction with indexability, ranking, accessibility compliance, or legal permission to reuse content.
 

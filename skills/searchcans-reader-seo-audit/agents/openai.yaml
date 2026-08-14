@@ -1,0 +1,4 @@
+interface:
+  display_name: "SearchCans Reader SEO Audit"
+  short_description: "Audit web-to-Markdown extraction and SEO signals"
+  default_prompt: "Use $searchcans-reader-seo-audit to inspect this page."
