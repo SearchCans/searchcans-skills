@@ -1,4 +1,4 @@
 interface:
   display_name: "SearchCans Deep Research"
-  short_description: "Plan and verify bounded web research"
-  default_prompt: "Use $searchcans-deep-research to plan 3–5 questions and cite only extracted evidence."
+  short_description: "Plan verified research with adaptive budgets"
+  default_prompt: "Use $searchcans-deep-research to plan evidence-led research within the account budget."

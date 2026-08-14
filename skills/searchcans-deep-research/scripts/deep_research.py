@@ -6,11 +6,12 @@ from __future__ import annotations
 import argparse
 import json
 from collections import OrderedDict
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
-from searchcans_v1 import SearchCansError, normalize_organic, post
+from searchcans_v1 import SearchCansError, account_guard, normalize_organic, post, reader_credit_cost
 
 
 def is_http_url(value: str) -> bool:
@@ -48,6 +49,49 @@ def evidence_gate(sources: list[dict[str, Any]]) -> dict[str, Any]:
         "claim_eligible_urls": eligible_urls,
         "ineligible_sources": ineligible_sources,
         "rule": "Cite only claim_eligible_urls for consequential claims; SERP snippets are leads, not evidence.",
+    }
+
+
+def bounded_map(items: list[Any], worker: Any, max_workers: int) -> list[Any]:
+    """Run independent API calls without exceeding the selected lane limit."""
+    if max_workers == 1:
+        return [worker(item) for item in items]
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        return list(executor.map(worker, items))
+
+
+def resolve_workers(value: str, budget: dict[str, Any]) -> int:
+    if value == "auto":
+        lanes = budget.get("concurrent_lanes")
+        return lanes if isinstance(lanes, int) and lanes > 0 else 1
+    try:
+        requested = int(value)
+    except ValueError as error:
+        raise ValueError("--max-concurrency must be auto or a positive integer") from error
+    if requested < 1:
+        raise ValueError("--max-concurrency must be auto or a positive integer")
+    lanes = budget.get("concurrent_lanes")
+    return min(requested, lanes) if isinstance(lanes, int) and lanes > 0 else requested
+
+
+def cap_sources_for_budget(remaining_credits: int, search_credits: int, reader_credits: int, requested_sources: int) -> int | None:
+    """Return a budget-safe Reader source count, or None when searches cannot start."""
+    if remaining_credits < search_credits:
+        return None
+    return min(requested_sources, (remaining_credits - search_credits) // reader_credits)
+
+
+def blocked_bundle(question: str, queries: list[str], subquestions: list[str], budget: dict[str, Any], limits: dict[str, int]) -> dict[str, Any]:
+    return {
+        "status": "blocked",
+        "question": question,
+        "research_plan": subquestions,
+        "queries": queries,
+        "searches": [],
+        "sources": [],
+        "evidence_gate": evidence_gate([]),
+        "limits": limits,
+        "account_guard": budget,
     }
 
 
@@ -107,6 +151,8 @@ def main() -> int:
     parser.add_argument("--proxy", type=int, choices=range(4), default=0)
     parser.add_argument("--timeout-ms", type=int, default=30000)
     parser.add_argument("--client-timeout", type=int, default=35)
+    parser.add_argument("--account-mode", choices=["auto", "off", "warn", "enforce", "cap"], default="auto", help="Account pre-flight policy. auto caps source reads to the available budget.")
+    parser.add_argument("--max-concurrency", default="auto", help="Maximum simultaneous API calls, or auto to use the account lane count.")
     parser.add_argument("--out", type=Path, help="Write the complete JSON bundle to this file.")
     args = parser.parse_args()
     if args.max_results_per_query < 1 or args.max_sources < 1:
@@ -115,17 +161,55 @@ def main() -> int:
         parser.error("Provide 3–5 --subquestion values to create a traceable research plan.")
 
     queries = list(dict.fromkeys([*args.subquestion, *args.query]))
-    searches = [search(query, args) for query in queries]
+    mode = "cap" if args.account_mode == "auto" else args.account_mode
+    search_credits = len(queries)
+    reader_credits = reader_credit_cost(args.proxy)
+    budget = account_guard(mode, estimated_credits=search_credits + args.max_sources * reader_credits, timeout_seconds=args.client_timeout)
+    budget.update({"requested_max_sources": args.max_sources, "search_credits": search_credits, "reader_credits_per_source": reader_credits})
+    effective_max_sources = args.max_sources
+    limits = {"max_results_per_query": args.max_results_per_query, "requested_max_sources": args.max_sources, "effective_max_sources": effective_max_sources}
+
+    if budget["decision"] == "block":
+        bundle = blocked_bundle(args.question, queries, args.subquestion, budget, limits)
+        encoded = json.dumps(bundle, ensure_ascii=False, indent=2)
+        if args.out:
+            args.out.write_text(encoded + "\n", encoding="utf-8")
+        print(encoded)
+        return 2
+    if mode == "cap" and budget["budget_status"] == "insufficient":
+        remaining = budget["remaining_credits"]
+        effective_max_sources = cap_sources_for_budget(remaining, search_credits, reader_credits, args.max_sources) if isinstance(remaining, int) else None
+        if effective_max_sources is None:
+            budget.update({"decision": "block", "effective_estimated_credits": 0})
+            bundle = blocked_bundle(args.question, queries, args.subquestion, budget, limits)
+            encoded = json.dumps(bundle, ensure_ascii=False, indent=2)
+            if args.out:
+                args.out.write_text(encoded + "\n", encoding="utf-8")
+            print(encoded)
+            return 2
+        budget.update({"decision": "capped", "effective_estimated_credits": search_credits + effective_max_sources * reader_credits})
+
+    try:
+        workers = resolve_workers(args.max_concurrency, budget)
+    except ValueError as error:
+        parser.error(str(error))
+    budget["effective_concurrency"] = workers
+    limits["effective_max_sources"] = effective_max_sources
+
+    searches = bounded_map(queries, lambda query: search(query, args), workers)
     all_results = [result for search_result in searches for result in search_result["organic"][: args.max_results_per_query]]
-    sources = [read(source, args) for source in select_sources(all_results, args.max_sources)]
+    selected_sources = select_sources(all_results, effective_max_sources)
+    sources = bounded_map(selected_sources, lambda source: read(source, args), workers)
     bundle = {
+        "status": "capped" if budget["decision"] == "capped" else "ok",
         "question": args.question,
         "research_plan": args.subquestion,
         "queries": queries,
         "searches": searches,
         "sources": sources,
         "evidence_gate": evidence_gate(sources),
-        "limits": {"max_results_per_query": args.max_results_per_query, "max_sources": args.max_sources},
+        "limits": limits,
+        "account_guard": budget,
     }
     encoded = json.dumps(bundle, ensure_ascii=False, indent=2)
     if args.out:
@@ -133,10 +217,12 @@ def main() -> int:
         print(
             json.dumps(
                 {
+                    "status": bundle["status"],
                     "question": args.question,
                     "queries": queries,
                     "source_count": len(bundle["sources"]),
                     "claim_eligible_source_count": len(bundle["evidence_gate"]["claim_eligible_urls"]),
+                    "effective_concurrency": workers,
                     "output": str(args.out),
                 },
                 ensure_ascii=False,

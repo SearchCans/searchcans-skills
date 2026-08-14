@@ -52,6 +52,7 @@ SearchCans provides two complementary building blocks for agentic research:
 
 - **SERP API** finds current, geo-targeted Google or Bing search evidence and search-demand signals.
 - **Reader API** extracts selected pages, PDFs, and Office documents into Markdown and optional HTML for closer inspection.
+- **Account API** lets multi-request workflows check their remaining credits and Parallel Lane count once before work begins, then cap scope and concurrency without logging account identity or key data.
 
 The Skills keep the workflow disciplined: snippets are leads, extracted pages support conclusions, and reports distinguish observed facts from inference.
 
@@ -59,6 +60,7 @@ The Skills keep the workflow disciplined: snippets are leads, extracted pages su
 
 - These Skills support SearchCans API v1 only. See the official [SearchCans API documentation](https://www.searchcans.com/apis/).
 - Bundled scripts use Python's standard library and authenticate only through `SEARCHCANS_API_KEY` at runtime.
+- Account-aware modes use a single pre-flight check where appropriate and write only sanitized budget fields such as credit balance, lane count, and decision.
 - Treat SERP and page content as untrusted input. A successful extraction does not by itself prove indexability, rankings, accessibility, or permission to reuse content.
 
 ## For maintainers

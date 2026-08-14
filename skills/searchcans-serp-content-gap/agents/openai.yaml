@@ -1,4 +1,4 @@
 interface:
   display_name: "SearchCans SERP Content Gap"
-  short_description: "Build geo-targeted briefs with visible API status"
-  default_prompt: "Use $searchcans-serp-content-gap to analyze this keyword and show the request status."
+  short_description: "Build geo-targeted briefs with adaptive budgets"
+  default_prompt: "Use $searchcans-serp-content-gap to analyze this keyword with account-aware scope."

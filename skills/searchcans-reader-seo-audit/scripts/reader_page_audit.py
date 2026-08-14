@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
-from searchcans_v1 import post
+from searchcans_v1 import account_guard, post, reader_credit_cost
 
 
 class PageSignalsParser(HTMLParser):
@@ -76,10 +76,27 @@ def main() -> int:
     parser.add_argument("--proxy", type=int, choices=range(4), default=0)
     parser.add_argument("--timeout-ms", type=int, default=30000)
     parser.add_argument("--client-timeout", type=int, default=35)
+    parser.add_argument("--account-mode", choices=["auto", "off", "warn", "enforce", "cap"], default="auto", help="Account pre-flight policy. auto checks higher-cost proxy requests.")
     parser.add_argument("--out", type=Path, help="Write the full API body plus audit result to this file.")
     args = parser.parse_args()
     if not valid_url(args.url):
         parser.error("url must be an absolute http or https URL")
+
+    mode = "enforce" if args.account_mode == "auto" and args.proxy > 0 else "off" if args.account_mode == "auto" else args.account_mode
+    budget = account_guard(mode, estimated_credits=reader_credit_cost(args.proxy), timeout_seconds=args.client_timeout)
+    if mode == "cap" and budget["budget_status"] == "insufficient":
+        budget["decision"] = "block"
+    if budget["decision"] == "block":
+        result = {
+            "status": "blocked",
+            "url": args.url,
+            "account_guard": budget,
+        }
+        encoded = json.dumps(result, ensure_ascii=False, indent=2)
+        if args.out:
+            args.out.write_text(json.dumps({"result": result}, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        print(encoded)
+        return 2
 
     payload: dict[str, Any] = {"t": "url", "s": args.url, "d": args.timeout_ms, "proxy": args.proxy}
     if args.headless:
@@ -100,7 +117,9 @@ def main() -> int:
         parser_html.close()
 
     result = {
+        "status": "ok",
         "url": args.url,
+        "account_guard": budget,
         "api_code": body.get("code"),
         "request_id": body.get("requestId"),
         "title": data.get("title", ""),

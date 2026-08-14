@@ -1,6 +1,6 @@
 ---
 name: searchcans-serp-content-gap
-description: Analyze a current, geo-targeted Google or Bing SERP with SearchCans and turn its organic results, People Also Ask questions, related searches, knowledge graph, and news signals into an evidence-backed content opportunity brief. Use for SEO/GEO content planning, keyword research, competitor-page analysis, and search-intent analysis.
+description: Analyze a current, geo-targeted Google or Bing SERP with SearchCans and turn its organic results, People Also Ask questions, related searches, knowledge graph, and news signals into an evidence-backed, account-aware content opportunity brief. Use for SEO/GEO content planning, keyword research, competitor-page analysis, and search-intent analysis.
 ---
 
 # SearchCans SERP Content Gap
@@ -17,6 +17,8 @@ Set `SEARCHCANS_API_KEY` in the execution environment. Never store it in a file 
 
 Run one page first. Request more pages only if the analysis requires them; `--page 3` requests pages 1–3 and consumes additional search credits. The script retries only transient failures, twice at most by default; use `--retries 1` when credit minimization matters more than recovery.
 
+For multi-page jobs, the default `--account-mode auto` makes one Account API pre-flight call and caps the fetched page count to the available credit balance. Use `--account-mode warn` to observe the budget without changing scope, `enforce` to stop before an insufficient job, `cap` to force capping for any page count, or `off` to skip the account check. The report retains only a sanitized `account_guard` summary; it never includes account email or API key data.
+
 ```bash
 python scripts/serp_content_gap.py "best SERP API" \
   --engine google --country us --language en --page 1 --out serp-evidence.json
@@ -29,6 +31,7 @@ Check `status` and `request` before interpreting the evidence:
 - `ok`: analyze the returned SERP snapshot.
 - `no_results`: report the keyword and market as unobserved; do not claim there is no demand or no opportunity. Adjust the query only with user approval.
 - `failed`: surface `api_code`, `api_message`, and retry count. Do not turn a failed request into a content brief.
+- `blocked`: the Account Guard stopped the job before the SERP request. Report the requested scope and budget decision; do not guess SERP findings.
 
 ## Write the brief
 
