@@ -34,6 +34,8 @@ $env:SEARCHCANS_API_KEY = "your-api-key"
 
 Never put an API key in a prompt, source file, output artifact, or Git commit.
 
+> **Start with weekly free credits.** Sign in to SearchCans and visit [Dashboard → Free Redemption Codes](https://www.searchcans.com/dashboard/redeem-codes/) to claim the current code. A new code is released every week, and each code adds **1,000 API credits**. Each account may redeem one code per batch.
+
 ## Choose a workflow
 
 | Skill | Best for | What the agent delivers |
