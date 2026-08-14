@@ -1,0 +1,4 @@
+interface:
+  display_name: "SearchCans SERP Content Gap"
+  short_description: "Turn SERP evidence into a content opportunity brief"
+  default_prompt: "Use $searchcans-serp-content-gap to analyze this keyword and market."

@@ -1,0 +1,42 @@
+---
+name: searchcans-serp-content-gap
+description: Analyze a current, geo-targeted Google or Bing SERP with SearchCans and turn its organic results, People Also Ask questions, related searches, knowledge graph, and news signals into an evidence-backed content opportunity brief. Use for SEO/GEO content planning, keyword research, competitor-page analysis, and search-intent analysis.
+---
+
+# SearchCans SERP Content Gap
+
+Turn a current SERP into a concise content opportunity brief. Treat the output as a research snapshot, not a rank-tracking guarantee or a claim that every feature appears on every SERP.
+
+## Define the search market
+
+Collect the target keyword, search engine, country, language, intended audience, and the page or product the user wants to improve. Use `country` and `language` together; do not silently substitute a default market when localization matters.
+
+Set `SEARCHCANS_API_KEY` in the execution environment. Never store it in a file or commit it.
+
+## Collect SERP evidence
+
+Run one page first. Request more pages only if the analysis requires them; `--page 3` requests pages 1–3 and consumes additional search credits.
+
+```bash
+python scripts/serp_content_gap.py "best SERP API" \
+  --engine google --country us --language en --page 1 --out serp-evidence.json
+```
+
+Use `references/content-brief.md` to interpret the JSON. Read `organic` results for competing pages, `people_also_ask` for question demand, `related_searches` for expansion ideas, and `top_stories` only when freshness is relevant.
+
+## Write the brief
+
+Deliver:
+
+1. Market and query definition.
+2. Observed SERP intent and dominant page types.
+3. Leading domains and angles, with URLs.
+4. Question and subtopic opportunities grounded in PAA or related searches.
+5. A proposed content structure, differentiation angle, and evidence gaps to validate with Reader API.
+
+Do not infer search volume, traffic, ranking movement, or a competitor's business results from this one SERP snapshot. Treat all snippets as leads that require full-page verification before making factual claims.
+
+## Resources
+
+- `scripts/serp_content_gap.py` retrieves the localized SERP evidence pack.
+- `references/content-brief.md` provides the required report structure and interpretation boundaries.

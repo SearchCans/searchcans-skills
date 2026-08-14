@@ -1,0 +1,4 @@
+interface:
+  display_name: "SearchCans Reader Page Audit"
+  short_description: "Audit page extractability and SEO-ready signals"
+  default_prompt: "Use $searchcans-reader-page-audit to inspect this page."

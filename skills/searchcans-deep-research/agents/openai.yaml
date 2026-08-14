@@ -1,0 +1,4 @@
+interface:
+  display_name: "SearchCans Deep Research"
+  short_description: "Evidence-led web research with SearchCans"
+  default_prompt: "Use $searchcans-deep-research to investigate this topic with current web sources."
