@@ -1,5 +1,11 @@
 # Content Brief Standard
 
+## Verify request state first
+
+- Use the evidence pack only when `status` is `ok`.
+- For `no_results`, record the exact keyword and market, then suggest a broader or alternative query. A zero-result snapshot does not prove zero demand.
+- For `failed`, preserve the request status and error details. Do not fabricate intent, leading domains, or opportunities.
+
 ## Interpret the SERP
 
 - Group organic results by page type and user intent: explanatory, comparison, commercial, documentation, news, or navigational.

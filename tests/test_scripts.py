@@ -32,6 +32,64 @@ class SearchCansScriptTests(unittest.TestCase):
         self.assertEqual(compatibility[0]["snippet"], "Body")
         self.assertTrue(module.is_success_code(-9999))
 
+    def test_content_gap_labels_no_results_and_preserves_request_metadata(self) -> None:
+        module = load_module("content_gap_client", "skills/searchcans-serp-content-gap/scripts/searchcans_v1.py")
+        body = module.with_request_metadata({"code": -9999, "msg": "No results", "data": {}}, attempts=1)
+        metadata = module.request_metadata(body)
+        self.assertEqual(metadata["status"], "no_results")
+        self.assertEqual(metadata["api_code"], -9999)
+        self.assertEqual(metadata["attempts"], 1)
+        self.assertEqual(metadata["retry_count"], 0)
+
+    def test_content_gap_retries_only_transient_api_errors(self) -> None:
+        module = load_module("content_gap_retry_client", "skills/searchcans-serp-content-gap/scripts/searchcans_v1.py")
+
+        class Response:
+            def __init__(self, body: dict[str, object]) -> None:
+                self.body = body
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, exc_type, exc, traceback) -> bool:
+                return False
+
+            def read(self) -> bytes:
+                import json
+
+                return json.dumps(self.body).encode("utf-8")
+
+        responses = iter([Response({"code": 1001, "msg": "Timeout"}), Response({"code": 0, "data": {}})])
+        delays: list[float] = []
+        original_urlopen = module.urlopen
+        original_sleep = module.time.sleep
+        original_api_key = module.api_key
+        module.urlopen = lambda *args, **kwargs: next(responses)
+        module.time.sleep = lambda delay: delays.append(delay)
+        module.api_key = lambda: "test-key"
+        try:
+            body = module.post("search", {"t": "google", "s": "test"}, retries=2)
+        finally:
+            module.urlopen = original_urlopen
+            module.time.sleep = original_sleep
+            module.api_key = original_api_key
+
+        self.assertEqual(body["_searchcans_client"]["status"], "ok")
+        self.assertEqual(body["_searchcans_client"]["attempts"], 2)
+        self.assertEqual(body["_searchcans_client"]["retry_count"], 1)
+        self.assertEqual(delays, [0.3])
+
+    def test_deep_research_evidence_gate_excludes_unread_sources(self) -> None:
+        module = load_module("deep_research", "skills/searchcans-deep-research/scripts/deep_research.py")
+        gate = module.evidence_gate(
+            [
+                {"url": "https://evidence.example", "status": "ok", "claim_ready": True},
+                {"url": "https://empty.example", "status": "empty", "claim_ready": False},
+            ]
+        )
+        self.assertEqual(gate["claim_eligible_urls"], ["https://evidence.example"])
+        self.assertEqual(gate["ineligible_sources"], [{"url": "https://empty.example", "status": "empty"}])
+
     def test_extracts_page_signals(self) -> None:
         module = load_module("seo_audit", "skills/searchcans-reader-seo-audit/scripts/reader_page_audit.py")
         parser = module.PageSignalsParser()

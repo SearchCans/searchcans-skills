@@ -15,6 +15,7 @@ API_BASE = "https://www.searchcans.com/api/v1"
 RETRYABLE_APP_CODES = {1001, 1002, 1003, 1004, 1005, 1006, 1009, 1010, 443, 10054}
 RETRYABLE_HTTP_CODES = {429, 500, 502, 503, 504}
 FATAL_HTTP_CODES = {400, 401, 402, 403}
+NO_RESULTS_APP_CODES = {9999, -9999}
 
 
 class SearchCansError(RuntimeError):
@@ -22,7 +23,39 @@ class SearchCansError(RuntimeError):
 
 
 def is_success_code(code: Any) -> bool:
-    return code == 0 or code in {9999, -9999}
+    return code == 0 or code in NO_RESULTS_APP_CODES
+
+
+def response_status(code: Any) -> str:
+    if code == 0:
+        return "ok"
+    if code in NO_RESULTS_APP_CODES:
+        return "no_results"
+    return "failed"
+
+
+def request_metadata(body: Mapping[str, Any]) -> dict[str, Any]:
+    client = body.get("_searchcans_client", {})
+    if not isinstance(client, Mapping):
+        client = {}
+    return {
+        "status": str(client.get("status") or response_status(body.get("code"))),
+        "api_code": body.get("code"),
+        "api_message": body.get("msg", ""),
+        "request_id": body.get("requestId") or body.get("request_id"),
+        "attempts": client.get("attempts"),
+        "retry_count": client.get("retry_count"),
+    }
+
+
+def with_request_metadata(body: dict[str, Any], attempts: int) -> dict[str, Any]:
+    enriched = dict(body)
+    enriched["_searchcans_client"] = {
+        "status": response_status(body.get("code")),
+        "attempts": attempts,
+        "retry_count": attempts - 1,
+    }
+    return enriched
 
 
 def api_key() -> str:
@@ -52,7 +85,7 @@ def post(endpoint: str, payload: dict[str, Any], timeout_seconds: int = 35, retr
         else:
             code = body.get("code")
             if is_success_code(code):
-                return body
+                return with_request_metadata(body, attempt + 1)
             if isinstance(code, int) and abs(code) in RETRYABLE_APP_CODES:
                 last_error = SearchCansError(f"API code {code}: {body.get('msg', '')}")
             else:

@@ -37,6 +37,20 @@ def select_sources(results: list[dict[str, Any]], maximum: int) -> list[dict[str
     return chosen
 
 
+def evidence_gate(sources: list[dict[str, Any]]) -> dict[str, Any]:
+    eligible_urls = [source["url"] for source in sources if source.get("claim_ready")]
+    ineligible_sources = [
+        {"url": source.get("url", ""), "status": source.get("status", "unknown")}
+        for source in sources
+        if not source.get("claim_ready")
+    ]
+    return {
+        "claim_eligible_urls": eligible_urls,
+        "ineligible_sources": ineligible_sources,
+        "rule": "Cite only claim_eligible_urls for consequential claims; SERP snippets are leads, not evidence.",
+    }
+
+
 def search(query: str, args: argparse.Namespace) -> dict[str, Any]:
     payload: dict[str, Any] = {
         "t": args.engine,
@@ -72,14 +86,16 @@ def read(source: dict[str, Any], args: argparse.Namespace) -> dict[str, Any]:
             "description": data.get("description", ""),
             "markdown": data.get("markdown", ""),
             "status": "ok" if data.get("markdown") else "empty",
+            "claim_ready": bool(data.get("markdown")),
         }
     except SearchCansError as error:
-        return {"url": source["url"], "serp_title": source.get("title", ""), "status": "error", "error": str(error)}
+        return {"url": source["url"], "serp_title": source.get("title", ""), "status": "error", "claim_ready": False, "error": str(error)}
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("question")
+    parser.add_argument("--subquestion", action="append", default=[], help="Research question to investigate; supply 3–5 before searching.")
     parser.add_argument("--query", action="append", default=[], help="Additional search query; repeat for a query matrix.")
     parser.add_argument("--engine", choices=["google", "bing"], default="google")
     parser.add_argument("--country", default="us")
@@ -95,15 +111,20 @@ def main() -> int:
     args = parser.parse_args()
     if args.max_results_per_query < 1 or args.max_sources < 1:
         parser.error("--max-results-per-query and --max-sources must be positive")
+    if not 3 <= len(args.subquestion) <= 5:
+        parser.error("Provide 3–5 --subquestion values to create a traceable research plan.")
 
-    queries = list(dict.fromkeys([args.question, *args.query]))
+    queries = list(dict.fromkeys([*args.subquestion, *args.query]))
     searches = [search(query, args) for query in queries]
     all_results = [result for search_result in searches for result in search_result["organic"][: args.max_results_per_query]]
+    sources = [read(source, args) for source in select_sources(all_results, args.max_sources)]
     bundle = {
         "question": args.question,
+        "research_plan": args.subquestion,
         "queries": queries,
         "searches": searches,
-        "sources": [read(source, args) for source in select_sources(all_results, args.max_sources)],
+        "sources": sources,
+        "evidence_gate": evidence_gate(sources),
         "limits": {"max_results_per_query": args.max_results_per_query, "max_sources": args.max_sources},
     }
     encoded = json.dumps(bundle, ensure_ascii=False, indent=2)
@@ -115,6 +136,7 @@ def main() -> int:
                     "question": args.question,
                     "queries": queries,
                     "source_count": len(bundle["sources"]),
+                    "claim_eligible_source_count": len(bundle["evidence_gate"]["claim_eligible_urls"]),
                     "output": str(args.out),
                 },
                 ensure_ascii=False,

@@ -15,7 +15,7 @@ Set `SEARCHCANS_API_KEY` in the execution environment. Never store it in a file 
 
 ## Collect SERP evidence
 
-Run one page first. Request more pages only if the analysis requires them; `--page 3` requests pages 1–3 and consumes additional search credits.
+Run one page first. Request more pages only if the analysis requires them; `--page 3` requests pages 1–3 and consumes additional search credits. The script retries only transient failures, twice at most by default; use `--retries 1` when credit minimization matters more than recovery.
 
 ```bash
 python scripts/serp_content_gap.py "best SERP API" \
@@ -23,6 +23,12 @@ python scripts/serp_content_gap.py "best SERP API" \
 ```
 
 Use `references/content-brief.md` to interpret the JSON. Read `organic` results for competing pages, `people_also_ask` for question demand, `related_searches` for expansion ideas, and `top_stories` only when freshness is relevant.
+
+Check `status` and `request` before interpreting the evidence:
+
+- `ok`: analyze the returned SERP snapshot.
+- `no_results`: report the keyword and market as unobserved; do not claim there is no demand or no opportunity. Adjust the query only with user approval.
+- `failed`: surface `api_code`, `api_message`, and retry count. Do not turn a failed request into a content brief.
 
 ## Write the brief
 
