@@ -1,0 +1,7 @@
+interface:
+  display_name: "SearchCans Content Format Brief"
+  short_description: "Map search, visual, and video formats"
+  default_prompt: "Use $searchcans-content-format-brief to map localized content formats for this topic."
+
+policy:
+  allow_implicit_invocation: false

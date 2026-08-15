@@ -1,0 +1,7 @@
+interface:
+  display_name: "SearchCans Product SERP Brief"
+  short_description: "Compare localized product search signals"
+  default_prompt: "Use $searchcans-product-serp-brief to collect a market-specific product SERP brief."
+
+policy:
+  allow_implicit_invocation: false

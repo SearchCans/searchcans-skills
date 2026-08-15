@@ -1,0 +1,7 @@
+interface:
+  display_name: "SearchCans RAG Source Curator"
+  short_description: "Curate readable, traceable RAG sources"
+  default_prompt: "Use $searchcans-rag-source-curator to build an evidence-ready source manifest for this question."
+
+policy:
+  allow_implicit_invocation: false

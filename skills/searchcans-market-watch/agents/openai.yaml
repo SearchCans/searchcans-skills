@@ -1,0 +1,7 @@
+interface:
+  display_name: "SearchCans Market Watch"
+  short_description: "Track localized market and news evidence"
+  default_prompt: "Use $searchcans-market-watch to create an account-aware market evidence snapshot."
+
+policy:
+  allow_implicit_invocation: false

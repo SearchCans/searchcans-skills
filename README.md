@@ -1,4 +1,4 @@
-# SearchCans Agent Skills: Deep Research, SERP Intelligence & Web-to-Markdown
+# SearchCans Agent Skills: SERP Intelligence, Research & Web-to-Markdown
 
 [![skills.sh](https://skills.sh/b/SearchCans/searchcans-skills)](https://skills.sh/SearchCans/searchcans-skills)
 
@@ -43,6 +43,10 @@ Never put an API key in a prompt, source file, output artifact, or Git commit.
 | [`searchcans-deep-research`](skills/searchcans-deep-research/SKILL.md) | Market, competitor, product, technology, policy, or company research | A bounded, evidence-led brief with traceable source URLs and clear uncertainty. |
 | [`searchcans-serp-content-gap`](skills/searchcans-serp-content-gap/SKILL.md) | SEO/GEO content planning, keyword research, search intent, and competitor-page analysis | A localized Google or Bing SERP opportunity brief based on organic results, PAA, related searches, and available SERP signals. |
 | [`searchcans-reader-seo-audit`](skills/searchcans-reader-seo-audit/SKILL.md) | Web-to-Markdown extraction, RAG input checks, dynamic pages, and page-level SEO/GEO review | An extraction report plus observable canonical, H1, meta-description, and JSON-LD signals. |
+| [`searchcans-market-watch`](skills/searchcans-market-watch/SKILL.md) | Market, competitor, launch, and PR/news tracking | A current Google, Google News, Bing, and Reader evidence snapshot with optional URL-level baseline comparison. |
+| [`searchcans-product-serp-brief`](skills/searchcans-product-serp-brief/SKILL.md) | E-commerce category research and product-page planning | A localized Google Shopping, web, image, and optional merchant-page evidence brief. |
+| [`searchcans-content-format-brief`](skills/searchcans-content-format-brief/SKILL.md) | SEO/GEO content format planning and visual/video search research | A geo-targeted inventory of web, image, video, and short-video result formats. |
+| [`searchcans-rag-source-curator`](skills/searchcans-rag-source-curator/SKILL.md) | Grounding packs, knowledge-base intake, and source curation | A small, domain-diverse Reader/File source manifest with an evidence-readiness gate. |
 
 After installation, describe the goal in plain language or invoke a Skill directly, for example: `Use $searchcans-deep-research to investigate the current SERP API market in the US.`
 
@@ -50,8 +54,8 @@ After installation, describe the goal in plain language or invoke a Skill direct
 
 SearchCans provides two complementary building blocks for agentic research:
 
-- **SERP API** finds current, geo-targeted Google or Bing search evidence and search-demand signals.
-- **Reader API** extracts selected pages, PDFs, and Office documents into Markdown and optional HTML for closer inspection.
+- **SERP API** finds current, geo-targeted Google/Bing web, Shopping, News, Images, Videos, and Short Videos search evidence.
+- **Reader API** extracts selected pages, PDFs, and Office documents into Markdown and optional HTML; it can also produce optional screenshots for visual review.
 - **Account API** lets multi-request workflows check their remaining credits and Parallel Lane count once before work begins, then cap scope and concurrency without logging account identity or key data.
 
 The Skills keep the workflow disciplined: snippets are leads, extracted pages support conclusions, and reports distinguish observed facts from inference.
