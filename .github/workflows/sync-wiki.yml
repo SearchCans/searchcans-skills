@@ -20,10 +20,14 @@ concurrency:
 
 jobs:
   sync:
-    if: ${{ secrets.WIKI_SYNC_TOKEN != '' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+      - name: Verify the Wiki token is configured
+        env:
+          WIKI_SYNC_TOKEN: ${{ secrets.WIKI_SYNC_TOKEN }}
+        run: |
+          test -n "$WIKI_SYNC_TOKEN" || { echo "Set repository secret WIKI_SYNC_TOKEN before synchronizing the Wiki."; exit 1; }
       - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
