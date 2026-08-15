@@ -32,19 +32,20 @@ jobs:
         with:
           python-version: "3.12"
       - run: python scripts/generate_docs.py --check
-      - name: Clone the Wiki repository
+      - name: Clone and synchronize the Wiki repository
         env:
           WIKI_SYNC_TOKEN: ${{ secrets.WIKI_SYNC_TOKEN }}
         run: |
-          git clone "https://x-access-token:${WIKI_SYNC_TOKEN}@github.com/${GITHUB_REPOSITORY}.wiki.git" wiki
-      - name: Copy only generated SearchCans pages
-        run: python scripts/sync_wiki.py --source docs/generated/wiki --target wiki
-      - name: Commit and push only if generated pages changed
-        working-directory: wiki
-        run: |
-          git config user.name "SearchCans"
-          git config user.email "support@searchcans.com"
-          git add --all
-          if git diff --cached --quiet; then exit 0; fi
-          git commit -m "docs: sync generated Skill documentation"
-          git push
+          askpass="$RUNNER_TEMP/wiki-askpass.sh"
+          printf '%s\n' '#!/usr/bin/env sh' 'case "$1" in' '*Username*) printf "%s" "x-access-token" ;;' '*Password*) printf "%s" "$WIKI_SYNC_TOKEN" ;;' 'esac' > "$askpass"
+          chmod 700 "$askpass"
+          export GIT_ASKPASS="$askpass"
+          export GIT_TERMINAL_PROMPT=0
+          git clone "https://github.com/${GITHUB_REPOSITORY}.wiki.git" wiki
+          python scripts/sync_wiki.py --source docs/generated/wiki --target wiki
+          git -C wiki config user.name "SearchCans"
+          git -C wiki config user.email "support@searchcans.com"
+          git -C wiki add --all
+          if git -C wiki diff --cached --quiet; then exit 0; fi
+          git -C wiki commit -m "docs: sync generated Skill documentation"
+          git -C wiki push

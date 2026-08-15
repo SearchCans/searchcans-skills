@@ -18,4 +18,4 @@ Do not manually edit `docs/generated/wiki/` or the generated README catalog bloc
 2. Create a dedicated automation credential that can push to `https://github.com/SearchCans/searchcans-skills.wiki.git`. Store it as the repository Actions secret `WIKI_SYNC_TOKEN`.
 3. The `sync-wiki.yml` workflow runs only on `main` documentation/Skill changes or from **Actions → Run workflow**. It validates the secret as its first job step, then copies only files in `.searchcans-generated-pages`; it never recursively wipes unknown Wiki pages.
 
-Use a dedicated bot or narrowly scoped token. Never place the token in the repository, generated docs, action logs, or a user-facing page.
+Use a dedicated bot or narrowly scoped token. The workflow passes it to Git through an ephemeral `GIT_ASKPASS` helper rather than embedding it in a remote URL. Never place the token in the repository, generated docs, action logs, or a user-facing page.
