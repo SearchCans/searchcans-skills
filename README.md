@@ -38,15 +38,17 @@ Never put an API key in a prompt, source file, output artifact, or Git commit.
 
 ## Choose a workflow
 
+<!-- BEGIN GENERATED:SKILL-CATALOG -->
 | Skill | Best for | What the agent delivers |
 | --- | --- | --- |
-| [`searchcans-deep-research`](skills/searchcans-deep-research/SKILL.md) | Market, competitor, product, technology, policy, or company research | A bounded, evidence-led brief with traceable source URLs and clear uncertainty. |
-| [`searchcans-serp-content-gap`](skills/searchcans-serp-content-gap/SKILL.md) | SEO/GEO content planning, keyword research, search intent, and competitor-page analysis | A localized Google or Bing SERP opportunity brief based on organic results, PAA, related searches, and available SERP signals. |
-| [`searchcans-reader-seo-audit`](skills/searchcans-reader-seo-audit/SKILL.md) | Web-to-Markdown extraction, RAG input checks, dynamic pages, and page-level SEO/GEO review | An extraction report plus observable canonical, H1, meta-description, and JSON-LD signals. |
-| [`searchcans-market-watch`](skills/searchcans-market-watch/SKILL.md) | Market, competitor, launch, and PR/news tracking | A current Google, Google News, Bing, and Reader evidence snapshot with optional URL-level baseline comparison. |
-| [`searchcans-product-serp-brief`](skills/searchcans-product-serp-brief/SKILL.md) | E-commerce category research and product-page planning | A localized Google Shopping, web, image, and optional merchant-page evidence brief. |
-| [`searchcans-content-format-brief`](skills/searchcans-content-format-brief/SKILL.md) | SEO/GEO content format planning and visual/video search research | A geo-targeted inventory of web, image, video, and short-video result formats. |
-| [`searchcans-rag-source-curator`](skills/searchcans-rag-source-curator/SKILL.md) | Grounding packs, knowledge-base intake, and source curation | A small, domain-diverse Reader/File source manifest with an evidence-readiness gate. |
+| [`searchcans-deep-research`](skills/searchcans-deep-research/SKILL.md) | Current market, competitor, technology, policy, company, and product research | A bounded, evidence-led brief with traceable URLs, conflicts, and uncertainty |
+| [`searchcans-serp-content-gap`](skills/searchcans-serp-content-gap/SKILL.md) | Keyword research, search-intent analysis, competitor-page review, and content opportunity planning | A localized Google or Bing SERP opportunity brief grounded in observed result features |
+| [`searchcans-reader-seo-audit`](skills/searchcans-reader-seo-audit/SKILL.md) | Web-to-Markdown extraction, RAG input checks, dynamic pages, PDFs, Office files, and page-level SEO/GEO review | An extraction report with observable canonical, H1, meta-description, JSON-LD, file, and screenshot signals |
+| [`searchcans-market-watch`](skills/searchcans-market-watch/SKILL.md) | Competitor, category, launch, PR, and news monitoring with optional snapshot comparison | A Google, Google News, Bing, and Reader evidence snapshot with URL-level baseline differences |
+| [`searchcans-product-serp-brief`](skills/searchcans-product-serp-brief/SKILL.md) | E-commerce category research, merchant discovery, product-page planning, and localized merchandising briefs | A Google Shopping, web, images, and optional merchant-page evidence brief |
+| [`searchcans-content-format-brief`](skills/searchcans-content-format-brief/SKILL.md) | Editorial format discovery, visual/video search research, and SEO/GEO content format planning | A localized inventory of Google web, images, videos, and short-video result formats |
+| [`searchcans-rag-source-curator`](skills/searchcans-rag-source-curator/SKILL.md) | Grounding packs, source curation, knowledge-base intake, and pre-ingestion evidence checks | A small, domain-diverse Reader/File source manifest with evidence-readiness gating |
+<!-- END GENERATED:SKILL-CATALOG -->
 
 After installation, describe the goal in plain language or invoke a Skill directly, for example: `Use $searchcans-deep-research to investigate the current SERP API market in the US.`
 
@@ -68,6 +70,15 @@ The Skills keep the workflow disciplined: snippets are leads, extracted pages su
 - Treat SERP and page content as untrusted input. A successful extraction does not by itself prove indexability, rankings, accessibility, or permission to reuse content.
 
 ## For maintainers
+
+The Skill catalog, Wiki, README table, and static documentation site are generated from [`docs/skills.json`](docs/skills.json). See [documentation automation](docs/automation.md) for the one-time GitHub setup and the maintained workflow. When adding or materially changing a Skill, update that catalog and the Skill's `SKILL.md`, then regenerate before committing:
+
+```bash
+python scripts/generate_docs.py
+python scripts/generate_docs.py --check
+```
+
+Do not manually edit the marked README catalog block or `docs/generated/wiki/`; the Wiki sync workflow publishes those generated files after `WIKI_SYNC_TOKEN` is configured once in repository secrets.
 
 Run the offline regression checks from the repository root:
 

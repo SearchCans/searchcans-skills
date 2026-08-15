@@ -1,0 +1,46 @@
+name: Sync generated GitHub Wiki
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "docs/skills.json"
+      - "docs/generated/wiki/**"
+      - "scripts/generate_docs.py"
+      - "scripts/sync_wiki.py"
+      - "skills/**/SKILL.md"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: "searchcans-skills-wiki"
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    if: ${{ secrets.WIKI_SYNC_TOKEN != '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - run: python scripts/generate_docs.py --check
+      - name: Clone the Wiki repository
+        env:
+          WIKI_SYNC_TOKEN: ${{ secrets.WIKI_SYNC_TOKEN }}
+        run: |
+          git clone "https://x-access-token:${WIKI_SYNC_TOKEN}@github.com/${GITHUB_REPOSITORY}.wiki.git" wiki
+      - name: Copy only generated SearchCans pages
+        run: python scripts/sync_wiki.py --source docs/generated/wiki --target wiki
+      - name: Commit and push only if generated pages changed
+        working-directory: wiki
+        run: |
+          git config user.name "SearchCans"
+          git config user.email "support@searchcans.com"
+          git add --all
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "docs: sync generated Skill documentation"
+          git push

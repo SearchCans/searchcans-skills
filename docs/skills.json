@@ -1,0 +1,81 @@
+{
+  "schema_version": 1,
+  "site": {
+    "title": "SearchCans Agent Skills",
+    "description": "Official, account-aware Agent Skills for SearchCans SERP, Reader, File Extraction, Screenshot, and Account APIs.",
+    "repository_url": "https://github.com/SearchCans/searchcans-skills",
+    "api_docs_url": "https://www.searchcans.com/apis/"
+  },
+  "skills": [
+    {
+      "name": "searchcans-deep-research",
+      "title": "SearchCans Deep Research",
+      "category": "Evidence-led research",
+      "best_for": "Current market, competitor, technology, policy, company, and product research",
+      "delivers": "A bounded, evidence-led brief with traceable URLs, conflicts, and uncertainty",
+      "apis": ["Google or Bing Search", "Reader", "Account"],
+      "account_policy": "Checks one pre-flight, caps Reader sources, and limits concurrency to reported lanes.",
+      "example": "Use $searchcans-deep-research to investigate the current SERP API market in the US."
+    },
+    {
+      "name": "searchcans-serp-content-gap",
+      "title": "SearchCans SERP Content Gap",
+      "category": "SEO and GEO planning",
+      "best_for": "Keyword research, search-intent analysis, competitor-page review, and content opportunity planning",
+      "delivers": "A localized Google or Bing SERP opportunity brief grounded in observed result features",
+      "apis": ["Google or Bing Search", "Account"],
+      "account_policy": "Checks multi-page jobs and caps page scope when the planned request count exceeds the budget.",
+      "example": "Use $searchcans-serp-content-gap to analyze this keyword in the US market."
+    },
+    {
+      "name": "searchcans-reader-seo-audit",
+      "title": "SearchCans Reader SEO Audit",
+      "category": "Extraction and technical review",
+      "best_for": "Web-to-Markdown extraction, RAG input checks, dynamic pages, PDFs, Office files, and page-level SEO/GEO review",
+      "delivers": "An extraction report with observable canonical, H1, meta-description, JSON-LD, file, and screenshot signals",
+      "apis": ["Reader", "File Extraction", "Screenshot", "Account"],
+      "account_policy": "Runs a pre-flight automatically for higher-cost proxy requests and keeps standard extraction lightweight.",
+      "example": "Use $searchcans-reader-seo-audit to inspect this page for extraction and SEO-ready signals."
+    },
+    {
+      "name": "searchcans-market-watch",
+      "title": "SearchCans Market Watch",
+      "category": "Market and news intelligence",
+      "best_for": "Competitor, category, launch, PR, and news monitoring with optional snapshot comparison",
+      "delivers": "A Google, Google News, Bing, and Reader evidence snapshot with URL-level baseline differences",
+      "apis": ["Google Search", "Google News", "Bing Search", "Reader", "Account"],
+      "account_policy": "Checks one pre-flight, caps selected Reader news sources, and respects reported lane count.",
+      "example": "Use $searchcans-market-watch to create a US market snapshot for this category."
+    },
+    {
+      "name": "searchcans-product-serp-brief",
+      "title": "SearchCans Product SERP Brief",
+      "category": "E-commerce intelligence",
+      "best_for": "E-commerce category research, merchant discovery, product-page planning, and localized merchandising briefs",
+      "delivers": "A Google Shopping, web, images, and optional merchant-page evidence brief",
+      "apis": ["Google Shopping", "Google Search", "Google Images", "Reader", "Account"],
+      "account_policy": "Checks the three SERP calls plus explicit Reader URLs and caps only source reads when needed.",
+      "example": "Use $searchcans-product-serp-brief to research this product category in the US."
+    },
+    {
+      "name": "searchcans-content-format-brief",
+      "title": "SearchCans Content Format Brief",
+      "category": "SEO and GEO planning",
+      "best_for": "Editorial format discovery, visual/video search research, and SEO/GEO content format planning",
+      "delivers": "A localized inventory of Google web, images, videos, and short-video result formats",
+      "apis": ["Google Search", "Google Images", "Google Videos", "Google Short Videos", "Account"],
+      "account_policy": "Checks one pre-flight per requested format and caps the selected formats in a fixed priority order.",
+      "example": "Use $searchcans-content-format-brief to map localized content formats for this topic."
+    },
+    {
+      "name": "searchcans-rag-source-curator",
+      "title": "SearchCans RAG Source Curator",
+      "category": "RAG and knowledge intake",
+      "best_for": "Grounding packs, source curation, knowledge-base intake, and pre-ingestion evidence checks",
+      "delivers": "A small, domain-diverse Reader/File source manifest with evidence-readiness gating",
+      "apis": ["Google or Bing Search", "Reader", "File Extraction", "Screenshot", "Account"],
+      "account_policy": "Checks search plus Reader/File source budget, caps selected sources, and limits workers to reported lanes.",
+      "example": "Use $searchcans-rag-source-curator to curate sources for this RAG question."
+    }
+  ]
+}
